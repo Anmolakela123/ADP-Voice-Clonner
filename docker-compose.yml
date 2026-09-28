@@ -1,0 +1,42 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend.Dockerfile
+    environment:
+      MODEL_NAME: ${MODEL_NAME:-ResembleAI/chatterbox}
+      MODEL_VERSION: ${MODEL_VERSION:-v3}
+      DEVICE: ${DEVICE:-auto}
+      MAX_WORDS: ${MAX_WORDS:-10000}
+      MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-50}
+      MAX_CHUNK_CHARS: ${MAX_CHUNK_CHARS:-700}
+      CORS_ORIGINS: ${CORS_ORIGINS:-*}
+      JOB_TTL_HOURS: ${JOB_TTL_HOURS:-6}
+      OUTPUT_BITRATE: ${OUTPUT_BITRATE:-192k}
+    volumes:
+      - ./data:/app/data
+      - model_cache:/root/.cache/huggingface
+    expose:
+      - "8000"
+    restart: unless-stopped
+    stop_grace_period: 30s
+    gpus: all
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8000/health >/dev/null || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+  web:
+    build:
+      context: .
+      dockerfile: web.Dockerfile
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "${WEB_PORT:-80}:80"
+    restart: unless-stopped
+    stop_grace_period: 10s
+volumes:
+  model_cache:

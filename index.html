@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#171916">
+  <meta name="description" content="Private multilingual AI voice cloning studio">
+  <title>Voice Cloning Studio</title>
+  <link rel="icon" href="logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#">
+        <img src="logo.svg" alt="" width="38" height="38">
+        <span><b>Voice</b>Forge <small>AI Studio</small></span>
+      </a>
+      <nav class="topnav">
+        <a class="active" href="#studio">Studio</a>
+        <a href="#history">History</a>
+        <a href="#settings">Settings</a>
+      </nav>
+      <button class="icon-btn" id="themeBtn" title="Toggle theme" aria-label="Toggle theme">☼</button>
+    </header>
+
+    <main id="studio" class="container">
+      <section class="hero">
+        <div>
+          <span class="eyebrow">PRIVATE • MULTILINGUAL • LONG-FORM</span>
+          <h1>Give your words <em>your voice.</em></h1>
+          <p>Upload a clear reference recording, choose a language, tune the delivery, and generate natural speech from your own authorized voice.</p>
+        </div>
+        <div class="hero-wave" aria-hidden="true">
+          <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+        </div>
+      </section>
+
+      <div id="alert" class="alert hidden" role="alert"></div>
+
+      <section class="workspace">
+        <div class="left-col">
+          <article class="card upload-card">
+            <div class="card-head">
+              <div><span class="step">01</span><div><h2>Reference voice</h2><p>Use a clean sample with natural speech.</p></div></div>
+              <span id="qualityBadge" class="badge muted">Not checked</span>
+            </div>
+
+            <label class="dropzone" id="dropzone">
+              <input id="voiceFile" type="file" accept=".mp3,.wav,.m4a,.flac,.ogg,audio/*" hidden>
+              <img src="upload.svg" alt="" width="42" height="42">
+              <strong>Drop MP3 / WAV here</strong>
+              <span>or <u>choose an audio file</u></span>
+              <small>Recommended: 10–20 seconds of clear speech • Max 50 MB</small>
+            </label>
+
+            <div id="filePreview" class="file-preview hidden">
+              <div class="file-icon">♫</div>
+              <div class="file-meta"><b id="fileName">voice.wav</b><span id="fileInfo">0:00</span></div>
+              <button id="removeFile" class="icon-btn small" aria-label="Remove voice">×</button>
+            </div>
+            <div class="audio-wrap hidden" id="voicePlayerWrap">
+              <audio id="voicePlayer" controls></audio>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-head">
+              <div><span class="step">02</span><div><h2>Language</h2><p>Generate in the selected language.</p></div></div>
+            </div>
+            <div id="languageGrid" class="language-grid"></div>
+          </article>
+
+          <article class="card script-card">
+            <div class="card-head">
+              <div><span class="step">03</span><div><h2>Your script</h2><p>Long-form text is automatically split into natural sections.</p></div></div>
+              <span id="wordCount" class="counter">0 / 10,000</span>
+            </div>
+            <textarea id="script" maxlength="120000" placeholder="Paste or type your narration here..."></textarea>
+            <div class="script-bottom">
+              <div class="presets">
+                <button data-limit="2000">2K</button>
+                <button data-limit="5000">5K</button>
+                <button data-limit="10000" class="selected">10K</button>
+              </div>
+              <span id="charCount">0 characters</span>
+            </div>
+          </article>
+        </div>
+
+        <aside class="right-col">
+          <article class="card controls-card">
+            <div class="card-head">
+              <div><span class="step">04</span><div><h2>Voice controls</h2><p>Balanced defaults are ready to use.</p></div></div>
+            </div>
+
+            <div class="control">
+              <div class="control-label"><b>Speed</b><output id="speedOut">1.00×</output></div>
+              <input id="speed" type="range" min="0.5" max="2" step="0.05" value="1">
+              <div class="range-labels"><span>0.5×</span><span>Natural</span><span>2×</span></div>
+            </div>
+
+            <div class="control">
+              <div class="control-label"><b>Stability / consistency</b><output id="stabilityOut">70%</output></div>
+              <input id="stability" type="range" min="0" max="1" step="0.01" value="0.70">
+              <div class="range-labels"><span>Expressive</span><span>Balanced</span><span>Stable</span></div>
+            </div>
+
+            <div class="control">
+              <div class="control-label"><b>Style / expressiveness</b><output id="expressOut">50%</output></div>
+              <input id="expressiveness" type="range" min="0" max="1" step="0.01" value="0.50">
+              <div class="range-labels"><span>Calm</span><span>Natural</span><span>Expressive</span></div>
+            </div>
+
+            <details class="advanced">
+              <summary>Advanced generation</summary>
+              <div class="control">
+                <div class="control-label"><b>Temperature</b><output id="tempOut">0.80</output></div>
+                <input id="temperature" type="range" min="0.1" max="1.5" step="0.05" value="0.8">
+              </div>
+            </details>
+          </article>
+
+          <article class="card generate-card">
+            <div class="consent">
+              <input id="consent" type="checkbox">
+              <label for="consent">I confirm I have permission to clone this voice.</label>
+            </div>
+            <button id="generateBtn" class="generate-btn">
+              <span class="spark">✦</span>
+              <span id="generateText">Generate voice</span>
+              <span class="arrow">→</span>
+            </button>
+            <div id="progressArea" class="progress-area hidden">
+              <div class="progress-top"><span id="progressMessage">Preparing…</span><b id="progressPct">0%</b></div>
+              <div class="progress-track"><i id="progressBar"></i></div>
+            </div>
+          </article>
+
+          <article id="resultCard" class="card result-card hidden">
+            <div class="success-title"><span>✓</span><div><b>Voice ready</b><small>Your long-form audio is complete.</small></div></div>
+            <audio id="resultPlayer" controls></audio>
+            <div class="result-actions">
+              <a id="downloadMp3" class="btn secondary" download>Download MP3</a>
+              <a id="downloadWav" class="btn secondary" download>Download WAV</a>
+              <button id="newGeneration" class="btn">New generation</button>
+            </div>
+          </article>
+        </aside>
+      </section>
+
+      <section class="feature-row">
+        <div><b>23+</b><span>languages</span></div>
+        <div><b>10K</b><span>words / run</span></div>
+        <div><b>3D</b><span>responsive UI</span></div>
+        <div><b>MP3 + WAV</b><span>export</span></div>
+      </section>
+
+      <section id="history" class="card history-card">
+        <div class="card-head"><div><h2>Session history</h2><p>Recent jobs on this browser.</p></div><button id="clearHistory" class="btn ghost">Clear</button></div>
+        <div id="historyList" class="history-list"><div class="empty">No generations yet.</div></div>
+      </section>
+    </main>
+
+    <footer>
+      <span>VoiceForge AI Studio</span>
+      <span>Use only voices you are authorized to clone.</span>
+    </footer>
+  </div>
+
+  <script src="config.js"></script>\n  <script src="app.js"></script>
+</body>
+</html>
